@@ -1,0 +1,6 @@
+ - name: deploy application
+   sudo: yes
+   remote_user: ec2-user
+   hosts: tag_Name_webserver272
+   roles:
+    - deploy-app

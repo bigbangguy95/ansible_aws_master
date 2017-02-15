@@ -1,0 +1,5 @@
+ - name: Undeploy Resources
+   hosts: localhost
+   connection: local
+   roles:
+    - terminate-ec2

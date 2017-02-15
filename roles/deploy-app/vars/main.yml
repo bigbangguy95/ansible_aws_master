@@ -1,0 +1,2 @@
+war_file_name: "WebApp1.war"
+remote_war_deploy_path: "/usr/share/tomcat8/webapps"

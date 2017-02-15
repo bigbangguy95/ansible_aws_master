@@ -1,0 +1,60 @@
+
+---
+ - name: Create the security group
+   ec2_group:
+     name: "sec_grp_webserver"
+     region: "{{ aws_region }}"
+     description: "Specify ports of ssh and tomcat"
+     rules:
+       - proto: tcp
+         from_port: 22
+         to_port: 22
+         cidr_ip: 0.0.0.0/0
+       - proto: tcp
+         from_port: 8080
+         to_port: 8080
+         cidr_ip: 0.0.0.0/0
+     vpc_id: "{{ vpc_id }}"
+     state: present
+     purge_rules: yes
+   register: sec_grp_webserver 
+
+ - name: Launch EC2 box in AWS
+   local_action:
+     module: ec2
+     key_name: "{{ keypair_name }}"
+     image: "{{ image }}"
+     instance_type: "{{ aws_instance_type }}"
+     vpc_subnet_id: "{{ vpc_subnet_ids|random }}"
+     group_id: "{{ sec_grp_webserver.group_id }}"
+     region: "{{ aws_region }}"
+     instance_tags: '{"Name":"{{ tag_Name }}"}'
+     wait: true
+     count: "{{ number_of_instances }}"
+     assign_public_ip: yes
+     volumes: 
+     - device_type: gp2
+       device_name: /dev/xvda
+       volume_size: "{{ volume_size }}"
+       delete_on_termination: true
+   register: provisioned
+
+ - debug: var=item
+   with_items: "{{provisioned.instances}}"
+
+ - name: Add servers to a temp group
+   add_host: 
+     name: "{{ item.public_ip }}"
+     groupname: launched_servers 
+     ec2_tag_Name: "{{ tag_Name }}"
+     ec2_region: "{{ aws_region }}"
+     ec2_ip_address: "{{item.public_ip}}"
+   with_items: "{{provisioned.instances}}"
+
+ - name: Wait for all the instances to startup (by checking ssh port)
+   wait_for: host={{item.public_ip}} 
+             port=22 
+             delay=60 
+             timeout=320 
+             state=started
+   with_items: "{{provisioned.instances}}"

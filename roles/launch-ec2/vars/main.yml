@@ -1,0 +1,10 @@
+aws_instance_type: "t2.micro"
+image: "ami-7172b611"
+security_group_id: "sg-344e8b4d"
+vpc_subnet_ids: ['subnet-5aeec53e']
+aws_region: "us-west-2"
+tag_Name: "webserver272"
+keypair_name: "ec2-1"
+volume_size: 8
+vpc_id: vpc-c29492a6
+number_of_instances: 1

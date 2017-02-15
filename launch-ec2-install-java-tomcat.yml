@@ -1,0 +1,13 @@
+ - name: provision ec2
+   hosts: localhost
+   connection: local
+   gather_facts: false
+   user: root
+   roles:
+    - launch-ec2
+ - name: install tomcat
+   sudo: yes
+   remote_user: ec2-user
+   hosts: launched_servers
+   roles:
+    - install-java-tomcat

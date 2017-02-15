@@ -1,0 +1,21 @@
+- name: Copy and replace HelloWorld application
+  copy: 
+    src={{ war_file_name }}
+    dest={{ remote_war_deploy_path }} 
+    mode=0644
+    force=yes
+  register: downloaded_war
+
+- name: Give correct permissions to tomcat war file
+  file: 
+    path: "{{ remote_war_deploy_path }}/{{ war_file_name }}"
+    owner: tomcat
+    group: tomcat
+  when: downloaded_war.changed
+  register: deployed_war
+ 
+- name: Restart tomcat service for remote box
+  service:
+    name: tomcat8
+    state: restarted
+  when: deployed_war.changed

@@ -1,0 +1,17 @@
+- name: Gather facts about all the EC2 instances
+  local_action:
+    module: ec2_remote_facts
+    region: "{{ aws_region }}"
+  register: aws_ec2
+
+- debug: var=item
+  with_items: "{{aws_ec2.instances}}"
+
+- name: Terminating old instances
+  local_action:
+    module: ec2
+    region: "{{ aws_region }}"
+    key_name: "{{ keypair_name }}"
+    instance_ids: "{{ item.id }}"
+    state: 'absent'
+  with_items: "{{aws_ec2.instances}}"
